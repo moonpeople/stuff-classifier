@@ -75,8 +75,8 @@ class StuffClassifier::Base
 
     @word_list[word][:categories] ||= {}
     @word_list[word][:categories][category] -= 1 if @word_list[word][:categories][category].present?
-    @word_list[word][:categories].delete(category) if @word_list[word][:categories][category] <= 0
-
+    @word_list[word][:categories].delete(category) if @word_list[word][:categories][category].present? &&
+            @word_list[word][:categories][category] <= 0
     @word_list[word][:_total_word] -= 1 if @word_list[word][:_total_word].present? && @word_list[word][:_total_word] > 0
 
     # words count by categroy
