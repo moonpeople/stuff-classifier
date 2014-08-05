@@ -68,7 +68,21 @@ class StuffClassifier::Base
     @category_list[category] ||= {}
     @category_list[category][:_total_word] ||= 0
     @category_list[category][:_total_word] += 1
+  end
 
+  def decr_word(word, category)
+    @word_list[word] ||= {}
+
+    @word_list[word][:categories] ||= {}
+    @word_list[word][:categories][category] -= 1 if @word_list[word][:categories][category].present?
+    @word_list[word][:categories].delete(category) if @word_list[word][:categories][category] <= 0
+
+    @word_list[word][:_total_word] -= 1 if @word_list[word][:_total_word].present? && @word_list[word][:_total_word] > 0
+
+    # words count by categroy
+    @category_list[category] ||= {}
+    @category_list[category][:_total_word] -= 1 if @category_list[category][:_total_word].present? &&
+        @category_list[category][:_total_word] > 0
   end
 
   def incr_cat(category)
@@ -78,7 +92,14 @@ class StuffClassifier::Base
 
     @training_count ||= 0
     @training_count += 1 
+  end
 
+  def decr_cat(category)
+    @category_list[category] ||= {}
+    @category_list[category][:_count] -= 1 if @category_list[category][:_count].present? &&
+        @category_list[category][:_count] > 0
+
+    @training_count -= 1 if @training_count > 0
   end
 
   # return number of times the word appears in a category
@@ -129,6 +150,11 @@ class StuffClassifier::Base
   def train(category, text)
     @tokenizer.each_word(text) {|w| incr_word(w, category) }
     incr_cat(category)
+  end
+
+  def untrain(category, text)
+    @tokenizer.each_word(text) {|w| decr_word(w, category) }
+    decr_cat(category)
   end
 
   # classify a text
